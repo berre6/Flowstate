@@ -19,6 +19,20 @@ Flowstate is a full-stack productivity and task management application designed 
 - Animation preferences
 - User-specific data management
 
+## Screenshots
+
+### Dashboard
+
+The Flowstate dashboard provides an overview of tasks, productivity statistics, and daily progress.
+
+![Flowstate Dashboard](screenshots/dashboard.png)
+
+### Settings
+
+Users can personalize their workspace with themes, interface density, and animation preferences.
+
+![Flowstate Settings](screenshots/settings.png)
+
 ## Tech Stack
 
 ### Frontend
