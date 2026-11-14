@@ -23,6 +23,12 @@ database_url = context.get_x_argument(
     os.getenv("DATABASE_URL", "sqlite:///./flowstate.db"),
 )
 
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace(
+        "postgres://",
+        "postgresql://",
+        1,
+    )
 config.set_main_option(
     "sqlalchemy.url",
     database_url.replace("%", "%%"),

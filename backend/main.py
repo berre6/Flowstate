@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 import jwt
+import os
 from fastapi.middleware.cors import CORSMiddleware
 
 from schemas import BudCreate, BudResponse, BudUpdate
@@ -29,13 +30,20 @@ from security import (
 
 
 app = FastAPI(title="Flowstate API")
+
+allowed_origins = os.getenv(
+    "CORS_ORIGINS",
+    "http://localhost:5173",
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[origin.strip() for origin in allowed_origins],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
