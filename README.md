@@ -1,37 +1,46 @@
 # Flowstate
 
-**Flowstate** is a task management REST API built with Python and FastAPI. It provides user authentication and personal task management through a secure, user-specific API.
-
-> The current implementation focuses on the backend. A React frontend is planned as the next development stage.
+Flowstate is a full-stack productivity and task management application designed to help users organize their work, manage tasks, and track progress through a calm and minimal interface.
 
 ## Features
 
-- User registration and login
+- User registration and authentication
 - JWT-based authentication
 - Password hashing with Argon2
-- Create, read, update, and delete tasks
-- User-specific task access and ownership validation
-- Task priorities: `low`, `medium`, and `high`
-- Task completion tracking
-- Input validation with Pydantic
-- SQLAlchemy ORM and SQLite database
-- Database migrations with Alembic
-- Cascade deletion of a user's tasks when their account is deleted
-- Automated tests with pytest
+- Dashboard with productivity statistics
+- Create, edit, and delete Pads
+- Break tasks into smaller steps called Buds
+- Track task and subtask completion
+- Task categories and priorities
+- Progress tracking
+- Customizable appearance settings
+- Botanical and Lavender themes
+- Adjustable interface density
+- Animation preferences
+- User-specific data management
 
 ## Tech Stack
 
-| Technology | Purpose |
-|---|---|
-| Python | Main programming language |
-| FastAPI | REST API framework |
-| SQLAlchemy | Database ORM |
-| SQLite | Database |
-| Alembic | Database migrations |
-| Pydantic | Data validation |
-| JWT | Authentication |
-| Argon2 | Password hashing |
-| Pytest | Automated testing |
+### Frontend
+- React 19
+- Vite
+- JavaScript
+- CSS
+
+### Backend
+- Python
+- FastAPI
+- SQLAlchemy
+- SQLite
+- Alembic
+- Pydantic
+- PyJWT
+- Argon2
+
+### Testing
+- Pytest
+- HTTPX
+- ESLint
 
 ## Project Structure
 
@@ -41,19 +50,32 @@ Flowstate/
 │   ├── migrations/
 │   │   └── versions/
 │   ├── main.py
+│   ├── database.py
 │   ├── models.py
 │   ├── schemas.py
-│   ├── database.py
 │   ├── security.py
 │   ├── test_main.py
 │   ├── requirements.txt
 │   ├── alembic.ini
 │   └── .env.example
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
+│
 ├── .gitignore
 └── README.md
 ```
 
 ## Getting Started
+
+### Prerequisites
+
+- Python 3.10 or later
+- Node.js and npm
 
 ### 1. Clone the repository
 
@@ -62,109 +84,112 @@ git clone https://github.com/berre6/Flowstate.git
 cd Flowstate
 ```
 
-### 2. Navigate to the backend directory
+### 2. Set up the backend
+
+Open a terminal in the project root:
 
 ```bash
 cd backend
-```
-
-### 3. Create and activate a virtual environment
-
-```bash
 python -m venv .venv
 ```
 
-On Windows:
+Activate the virtual environment.
+
+**Windows PowerShell:**
 
 ```powershell
-.venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 ```
 
-On macOS/Linux:
+**macOS / Linux:**
 
 ```bash
 source .venv/bin/activate
 ```
 
-### 4. Install dependencies
+Install the dependencies:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-### 5. Configure environment variables
+### 3. Configure environment variables
 
-Create a `.env` file using the example configuration:
+Create a local environment file from the example:
 
-On Windows PowerShell:
+**Windows PowerShell:**
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Configure the following variables in your `.env` file:
+Configure the required values in `backend/.env`. Use a secure secret key and the appropriate database URL.
 
-```env
-JWT_SECRET_KEY=your-secret-key-here
-DATABASE_URL=sqlite:///./flowstate.db
-```
+Never commit `.env` files or secret credentials.
 
-Replace the placeholder secret with a secure, randomly generated value. Never commit your `.env` file.
+### 4. Initialize the database
 
-### 6. Apply database migrations
+From the backend directory:
 
 ```bash
 python -m alembic upgrade head
 ```
 
-### 7. Start the development server
+### 5. Start the backend server
 
 ```bash
 python -m uvicorn main:app --reload
 ```
 
-The API will be available at:
+The backend runs at:
 
 `http://127.0.0.1:8000`
 
-Interactive API documentation:
+Interactive API documentation is available at:
 
 `http://127.0.0.1:8000/docs`
 
-## API Endpoints
+### 6. Set up the frontend
 
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/` | Root endpoint |
-| POST | `/auth/register` | Register a new user |
-| POST | `/auth/login` | Authenticate and receive an access token |
-| GET | `/users/me` | Get the current user's profile |
-| DELETE | `/users/me` | Delete the current user's account |
-| POST | `/tasks` | Create a task |
-| GET | `/tasks` | List the current user's tasks |
-| PATCH | `/tasks/{task_id}` | Update a task |
-| DELETE | `/tasks/{task_id}` | Delete a task |
+Open a second terminal:
 
-Protected endpoints require a valid JWT access token.
+```bash
+cd Flowstate/frontend
+npm install
+npm run dev
+```
+
+Open the local URL provided by Vite.
 
 ## Running Tests
 
-From the `backend` directory, run:
+From the backend directory, with the virtual environment activated:
 
 ```bash
 python -m pytest -v
 ```
 
-## Development Status
+## Code Quality
 
-- [x] Backend API implementation
-- [x] User authentication and authorization
-- [x] Task CRUD operations
-- [x] Database migrations
-- [x] Automated tests
-- [ ] React frontend
-- [ ] Frontend-backend integration
+Run the frontend linter:
 
-## License
+```bash
+cd frontend
+npm run lint
+```
 
-No license has been specified yet.
+Create a production build:
+
+```bash
+npm run build
+```
+
+## Project Status
+
+Flowstate is a full-stack application with an implemented React frontend and FastAPI backend.
+
+The project includes task management, authentication, database migrations, automated backend tests, and customizable interface settings.
+
+## Author
+
+**Berre Yilmaz**

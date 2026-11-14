@@ -4,6 +4,9 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 import jwt
+from fastapi.middleware.cors import CORSMiddleware
+
+from schemas import BudCreate, BudResponse, BudUpdate
 
 from database import Base, SessionLocal, engine
 import models
@@ -26,6 +29,13 @@ from security import (
 
 
 app = FastAPI(title="Flowstate API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
@@ -168,6 +178,8 @@ def create_task(
         description=task_data.description,
         priority=task_data.priority,
         user_id=current_user.id,
+        category=task_data.category,
+        deadline=task_data.deadline,
     )
 
     db.add(task)
@@ -263,5 +275,113 @@ def delete_task(
     except Exception:
         db.rollback()
         raise
+
+    return None
+
+
+@app.post(
+    "/tasks/{task_id}/buds",
+    response_model=BudResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_bud(
+    task_id: int,
+    bud_data: BudCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    task = db.query(models.Task).filter(
+        models.Task.id == task_id,
+        models.Task.user_id == current_user.id,
+    ).first()
+
+    if task is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Pad bulunamadı.",
+        )
+
+    bud = models.Bud(
+        title=bud_data.title,
+        task_id=task_id,
+    )
+
+    db.add(bud)
+    db.commit()
+    db.refresh(bud)
+
+    return bud
+
+
+@app.get(
+    "/tasks/{task_id}/buds",
+    response_model=list[BudResponse],
+)
+def get_buds(
+    task_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    task = db.query(models.Task).filter(
+        models.Task.id == task_id,
+        models.Task.user_id == current_user.id,
+    ).first()
+
+    if task is None:
+        raise HTTPException(status_code=404, detail="Pad bulunamadı.")
+
+    return task.buds
+
+
+@app.patch("/buds/{bud_id}", response_model=BudResponse)
+def update_bud(
+    bud_id: int,
+    bud_data: BudUpdate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    bud = (
+        db.query(models.Bud)
+        .join(models.Task)
+        .filter(
+            models.Bud.id == bud_id,
+            models.Task.user_id == current_user.id,
+        )
+        .first()
+    )
+
+    if bud is None:
+        raise HTTPException(status_code=404, detail="Bud bulunamadı.")
+
+    for field, value in bud_data.model_dump(exclude_unset=True).items():
+        setattr(bud, field, value)
+
+    db.commit()
+    db.refresh(bud)
+
+    return bud
+
+
+@app.delete("/buds/{bud_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_bud(
+    bud_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    bud = (
+        db.query(models.Bud)
+        .join(models.Task)
+        .filter(
+            models.Bud.id == bud_id,
+            models.Task.user_id == current_user.id,
+        )
+        .first()
+    )
+
+    if bud is None:
+        raise HTTPException(status_code=404, detail="Bud bulunamadı.")
+
+    db.delete(bud)
+    db.commit()
 
     return None

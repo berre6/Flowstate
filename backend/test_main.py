@@ -642,3 +642,146 @@ def test_user_can_delete_their_account_and_tasks(client):
 def test_delete_account_without_authentication_returns_401(client):
     response = client.delete("/users/me")
     assert response.status_code == 401
+
+
+def test_user_can_create_and_list_buds(client):
+    client.post(
+        "/auth/register",
+        json={
+            "email": "budtest@example.com",
+            "password": "TestPassword123!",
+        },
+    )
+
+    login = client.post(
+        "/auth/login",
+        data={
+            "username": "budtest@example.com",
+            "password": "TestPassword123!",
+        },
+    )
+    token = login.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    task = client.post(
+        "/tasks",
+        json={"title": "Learn Python"},
+        headers=headers,
+    )
+    task_id = task.json()["id"]
+
+    created = client.post(
+        f"/tasks/{task_id}/buds",
+        json={"title": "Learn OOP"},
+        headers=headers,
+    )
+
+    assert created.status_code == 201
+    assert created.json()["title"] == "Learn OOP"
+
+    listed = client.get(
+        f"/tasks/{task_id}/buds",
+        headers=headers,
+    )
+
+    assert listed.status_code == 200
+    assert len(listed.json()) == 1
+
+
+def test_user_can_update_and_delete_bud(client):
+    client.post(
+        "/auth/register",
+        json={
+            "email": "budupdate@example.com",
+            "password": "TestPassword123!",
+        },
+    )
+
+    login = client.post(
+        "/auth/login",
+        data={
+            "username": "budupdate@example.com",
+            "password": "TestPassword123!",
+        },
+    )
+    token = login.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    task = client.post(
+        "/tasks",
+        json={"title": "Learn Python"},
+        headers=headers,
+    )
+    task_id = task.json()["id"]
+
+    bud = client.post(
+        f"/tasks/{task_id}/buds",
+        json={"title": "Learn OOP"},
+        headers=headers,
+    )
+    bud_id = bud.json()["id"]
+
+    updated = client.patch(
+        f"/buds/{bud_id}",
+        json={"completed": True},
+        headers=headers,
+    )
+
+    assert updated.status_code == 200
+    assert updated.json()["completed"] is True
+
+    deleted = client.delete(
+        f"/buds/{bud_id}",
+        headers=headers,
+    )
+
+    assert deleted.status_code == 204
+
+
+def test_task_category_and_deadline(client):
+    client.post(
+        "/auth/register",
+        json={
+            "email": "categorytest@example.com",
+            "password": "TestPassword123!",
+        },
+    )
+
+    login = client.post(
+        "/auth/login",
+        data={
+            "username": "categorytest@example.com",
+            "password": "TestPassword123!",
+        },
+    )
+    token = login.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    created = client.post(
+        "/tasks",
+        json={
+            "title": "Learn FastAPI",
+            "category": "Education",
+            "deadline": "2026-12-01",
+        },
+        headers=headers,
+    )
+
+    assert created.status_code == 201
+    assert created.json()["category"] == "Education"
+    assert created.json()["deadline"] == "2026-12-01"
+
+    task_id = created.json()["id"]
+
+    updated = client.patch(
+        f"/tasks/{task_id}",
+        json={
+            "category": "Software",
+            "deadline": "2026-12-15",
+        },
+        headers=headers,
+    )
+
+    assert updated.status_code == 200
+    assert updated.json()["category"] == "Software"
+    assert updated.json()["deadline"] == "2026-12-15"
