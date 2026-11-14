@@ -2,6 +2,14 @@
 
 Flowstate is a full-stack productivity and task management application designed to help users organize their work, manage tasks, and track progress through a calm and minimal interface.
 
+
+## Live Demo
+
+**Try Flowstate:** https://flowstate-ruddy-eight.vercel.app
+
+No installation required. Open the link, create an account, and start managing your tasks!
+
+
 ## Features
 
 - User registration and authentication
